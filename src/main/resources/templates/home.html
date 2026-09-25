@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="~{index :: head}"></head>
+
+<body>
+
+    <head th:insert="~{index :: navbar}"></head>
+
+    <div th:if="${param.notAuthorized}">
+        <div class="alert alert-danger">
+            Not authorized!
+        </div>
+    </div>
+
+    <!-- Messaggio registrazione -->
+    <div
+        th:if="${successMessage}"
+        class="alert alert-success">
+
+        <p
+            class="mb-0"
+            th:text="${successMessage}">
+        </p>
+
+    </div>
+
+
+    <div th:if="${errorMessage}" class="alert alert-success">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Hero -->
+    <div class="container-fluid py-5">
+
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-12 py-5">
+
+                    <h2>
+                        Welcome to
+                    </h2>
+
+                    <h1 class="display-3 fw-bold">
+                        New Aulab Chronicle
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Ultimi articoli -->
+    <div class="container py-5">
+
+        <div class="row justify-content-center">
+
+            <div class="col-12 text-center mb-5">
+
+                <h2>
+                    Ultimi articoli
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="row justify-content-center"
+            th:if="${articles != null && articles.size() > 0}">
+
+            <div
+                th:each="article : ${articles}"
+                class="col-12 col-md-4 d-flex justify-content-center">
+
+                <div
+                    class="card mb-4"
+                    style="width: 18rem;">
+
+                    <!-- Immagine Supabase -->
+                    <img
+                        th:if="${article.image != null}"
+                        th:src="${article.image.path}"
+                        class="card-img-top"
+                        alt="Immagine articolo">
+
+                    <!-- Immagine di default -->
+                    <img
+                        th:unless="${article.image != null}"
+                        th:src="@{/images/default.jpg}"
+                        class="card-img-top"
+                        alt="Immagine di default">
+
+
+                    <div class="card-body">
+
+                        <h5
+                            class="card-title"
+                            th:text="${article.title}">
+                            Titolo
+                        </h5>
+
+                        <p
+                            class="card-text"
+                            th:text="${article.subtitle}">
+                            Sottotitolo
+                        </p>
+
+                        <p
+                            class="card-text text-muted"
+                            th:text="${article.user.username}">
+                            Autore
+                        </p>
+
+                        <a
+                            th:href="@{/articles/detail/{id}(id=${article.id})}"
+                            class="btn btn-primary">
+
+                            Leggi
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="row justify-content-center"
+            th:unless="${articles != null && articles.size() > 0}">
+
+            <div class="col-12 text-center">
+
+                <h4>
+                    Nessun articolo presente
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <head th:insert="~{index :: footer}"></head>
+
+    <script th:replace="~{index :: bootstrapScript}"></script>
+
+</body>
+
+</html>
