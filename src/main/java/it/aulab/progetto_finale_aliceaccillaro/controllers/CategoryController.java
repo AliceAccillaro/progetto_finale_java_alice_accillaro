@@ -3,6 +3,7 @@ package it.aulab.progetto_finale_aliceaccillaro.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,33 +27,26 @@ import it.aulab.progetto_finale_aliceaccillaro.services.CategoryService;
 public class CategoryController {
 
     @Autowired
+    private ArticleService articleService;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
-    private ArticleService articleService;
+    private ModelMapper modelMapper;
 
+    //Rotta per la ricerca dell'articolo in base alla categoria
     @GetMapping("/search/{id}")
-    public String searchByCategory(
-            @PathVariable("id") Long id,
-            Model viewModel) {
+    public String categorySearch(@PathVariable("id") Long id, Model viewModel) {
+        CategoryDto category = categoryService.read(id);
 
-        CategoryDto category =
-                categoryService.read(id);
+        viewModel.addAttribute("title", "Tutti gli articoli trovati per categoria " + category.getName());
 
-        List<ArticleDto> articles =
-                articleService.searchByCategory(category);
+        List<ArticleDto> articles = articleService.searchByCategory(modelMapper.map(category, Category.class));
 
         List<ArticleDto> acceptedArticles = articles.stream().filter(article -> Boolean.TRUE.equals(article.getIsAccepted())).collect(Collectors.toList());
 
-        viewModel.addAttribute(
-                "title",
-                "Articoli per categoria: " + category.getName()
-        );
-
-        viewModel.addAttribute(
-                "articles",
-                acceptedArticles
-        );
+        viewModel.addAttribute("articles", acceptedArticles);
 
         return "article/articles";
     }

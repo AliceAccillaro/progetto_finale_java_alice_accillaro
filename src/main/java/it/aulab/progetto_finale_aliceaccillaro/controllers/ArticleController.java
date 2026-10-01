@@ -45,122 +45,68 @@ public class ArticleController {
     private ArticleService articleService;
 
     @Autowired
-    ArticleRepository articleRepository;
+    private ArticleRepository articleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
-    // Rotta index di tutti gli articoli
+    //Rotta index degli articoli
     @GetMapping
     public String articlesIndex(Model viewModel) {
 
-        viewModel.addAttribute(
-                "title",
-                "Tutti gli articoli"
-        );
+        viewModel.addAttribute("title", "Tutti gli articoli");
 
         List<ArticleDto> articles = new ArrayList<ArticleDto>();
         for (Article article: articleRepository.findByIsAcceptedTrue()) {
             articles.add(modelMapper.map(article, ArticleDto.class));
         }
 
-        Collections.sort(
-                articles,
-                Comparator
-                        .comparing(ArticleDto::getPublishDate)
-                        .reversed()
-        );
+        Collections.sort(articles, Comparator.comparing(ArticleDto::getPublishDate).reversed());
 
-        viewModel.addAttribute(
-                "articles",
-                articles
-        );
-
+        viewModel.addAttribute("articles", articles);
         return "article/articles";
     }
 
-    // Rotta per la creazione di un articolo
+    //Rotta per la creazione di un articolo
     @GetMapping("create")
     public String articleCreate(Model viewModel) {
 
-        viewModel.addAttribute(
-                "title",
-                "Crea un articolo"
-        );
-
-        viewModel.addAttribute(
-                "article",
-                new Article()
-        );
-
-        viewModel.addAttribute(
-                "categories",
-                categoryService.readAll()
-        );
-
+        viewModel.addAttribute("title", "Crea un articolo");
+        viewModel.addAttribute("article", new Article());
+        viewModel.addAttribute("categories", categoryService.readAll());
         return "article/create";
     }
 
-    // Rotta per lo store di un articolo
+    //Rotta per lo store di un articolo
     @PostMapping
-    public String articleStore(
-            @Valid @ModelAttribute("article") Article article,
-            BindingResult result,
-            RedirectAttributes redirectAttributes,
-            Principal principal,
-            MultipartFile file,
-            Model viewModel) {
+    public String articleStore(@Valid @ModelAttribute("article") Article article,
+                                BindingResult result,
+                                RedirectAttributes redirectAttributes,
+                                Principal principal,
+                                MultipartFile file,
+                                Model viewModel) {
 
+        //Controllo degli errori con validazioni
         if (result.hasErrors()) {
-
-            viewModel.addAttribute(
-                    "title",
-                    "Crea un articolo"
-            );
-
-            viewModel.addAttribute(
-                    "article",
-                    article
-            );
-
-            viewModel.addAttribute(
-                    "categories",
-                    categoryService.readAll()
-            );
-
+            viewModel.addAttribute("title", "Crea un articolo");
+            viewModel.addAttribute("article", article);
+            viewModel.addAttribute("categories", categoryService.readAll());
             return "article/create";
         }
 
-        articleService.create(
-                article,
-                principal,
-                file
-        );
+        articleService.create(article, principal, file);
 
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Articolo aggiunto con successo!"
-        );
+        redirectAttributes.addFlashAttribute("successMessage", "Articolo aggiunto con successo!");
 
         return "redirect:/";
     }
 
-    // Rotta di dettaglio di un articolo
+    //Rotta di dettaglio di un articolo
     @GetMapping("detail/{id}")
-    public String detailArticle(
-            @PathVariable("id") Long id,
-            Model viewModel) {
+    public String detailArticle(@PathVariable("id") Long id, Model viewModel) {
 
-        viewModel.addAttribute(
-                "title",
-                "Article detail"
-        );
-
-        viewModel.addAttribute(
-                "article",
-                articleService.read(id)
-        );
-
+        viewModel.addAttribute("title", "Article detail");
+        viewModel.addAttribute("article", articleService.read(id));
         return "article/detail";
     }
     //Rotta di modifica di un articolo
@@ -237,7 +183,6 @@ public class ArticleController {
         List<ArticleDto> acceptedArticles = articles.stream().filter(article -> Boolean.TRUE.equals(article.getIsAccepted())).collect(Collectors.toList());
 
         viewModel.addAttribute("articles", acceptedArticles);
-
         return "article/articles";
     }
 }

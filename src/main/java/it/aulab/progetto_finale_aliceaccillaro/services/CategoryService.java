@@ -3,7 +3,6 @@ package it.aulab.progetto_finale_aliceaccillaro.services;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,7 @@ import it.aulab.progetto_finale_aliceaccillaro.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
 
 @Service
-public class CategoryService
-        implements CrudService<CategoryDto, Category, Long> {
+public class CategoryService implements CrudService<CategoryDto, Category, Long> {
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -31,17 +29,9 @@ public class CategoryService
     @Override
     public List<CategoryDto> readAll() {
 
-        List<CategoryDto> dtos =
-                new ArrayList<CategoryDto>();
-
+        List<CategoryDto> dtos = new ArrayList<CategoryDto>();
         for (Category category : categoryRepository.findAll()) {
-
-            dtos.add(
-                    modelMapper.map(
-                            category,
-                            CategoryDto.class
-                    )
-            );
+            dtos.add(modelMapper.map(category, CategoryDto.class));
         }
 
         return dtos;
@@ -49,40 +39,17 @@ public class CategoryService
 
     @Override
     public CategoryDto read(Long key) {
-
-        Optional<Category> optCategory =
-                categoryRepository.findById(key);
-
-        if (optCategory.isPresent()) {
-
-            return modelMapper.map(
-                    optCategory.get(),
-                    CategoryDto.class
-            );
-
-        } else {
-
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Category id: " + key + " not found"
-            );
-        }
+        return modelMapper.map(categoryRepository.findById(key), CategoryDto.class);
     }
 
     @Override
-    public CategoryDto create(
-            Category model,
-            Principal principal,
-            MultipartFile file) {
+    public CategoryDto create(Category model, Principal principal, MultipartFile file) {
 
         return modelMapper.map(categoryRepository.save(model), CategoryDto.class);
     }
 
     @Override
-    public CategoryDto update(
-            Long key,
-            Category model,
-            MultipartFile file) {
+    public CategoryDto update(Long key, Category model, MultipartFile file) {
 
         if (categoryRepository.existsById(key)) {
             model.setId(key);

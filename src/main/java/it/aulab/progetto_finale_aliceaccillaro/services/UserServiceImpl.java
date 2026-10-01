@@ -1,7 +1,5 @@
 package it.aulab.progetto_finale_aliceaccillaro.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +18,8 @@ import it.aulab.progetto_finale_aliceaccillaro.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,83 +45,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveUser(
-            UserDto userDto,
-            RedirectAttributes redirectAttributes,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public void saveUser(UserDto userDto, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 
         User user = new User();
+        user.setUsername(userDto.getFirstName() + " " + userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-        user.setUsername(
-                userDto.getFirstName()
-                        + " "
-                        + userDto.getLastName()
-        );
-
-        user.setEmail(
-                userDto.getEmail()
-        );
-
-        user.setPassword(
-                passwordEncoder.encode(
-                        userDto.getPassword()
-                )
-        );
-
-        Role role =
-                roleRepository.findByName(
-                        "ROLE_USER"
-                );
-
-        user.setRoles(
-                List.of(role)
-        );
+        Role role = roleRepository.findByName("ROLE_USER");
+        user.setRoles(List.of(role));
 
         userRepository.save(user);
 
-        authenticateUserAndSetSession(
-                user,
-                userDto,
-                request
-        );
+        authenticateUserAndSetSession(user, userDto, request);
     }
 
-    public void authenticateUserAndSetSession(
-            User user,
-            UserDto userDto,
-            HttpServletRequest request) {
+    public void authenticateUserAndSetSession(User user, UserDto userDto, HttpServletRequest request) {
 
         try {
+            CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
 
-            CustomUserDetails userDetails =
-                    customUserDetailsService
-                            .loadUserByUsername(
-                                    user.getEmail()
-                            );
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDto.getPassword());
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails.getUsername(),
-                            userDto.getPassword()
-                    );
+            Authentication authentication = authenticationManager.authenticate(authToken);
 
-            Authentication authentication =
-                    authenticationManager
-                            .authenticate(authToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+            HttpSession session = request.getSession(true);
 
-            HttpSession session =
-                    request.getSession(true);
-
-            session.setAttribute(
-                    "SPRING_SECURITY_CONTEXT",
-                    SecurityContextHolder
-                            .getContext()
-            );
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         } catch (AuthenticationException e) {
             e.printStackTrace();
@@ -131,8 +83,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User find(Long id) {
 
-        return userRepository
-                .findById(id)
-                .get();
+        return userRepository.findById(id).get();
     }
 }

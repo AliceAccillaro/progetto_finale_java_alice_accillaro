@@ -22,8 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public CustomUserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmail(username);
 
@@ -40,22 +39,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
     }
 
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(
-            Collection<Role> roles) {
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
 
         Collection<? extends GrantedAuthority> mapRoles = null;
 
         if (roles.size() != 0) {
-
             mapRoles = roles.stream()
                     .map(role -> new SimpleGrantedAuthority(role.getName()))
                     .collect(Collectors.toList());
 
         } else {
-
-            mapRoles = Arrays.asList(
-                    new SimpleGrantedAuthority("ROLE_USER")
-            );
+            mapRoles = Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
         }
 
         return mapRoles;
